@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0DE95A43-16EC-416D-9A58-E42FFB29CFC8}"
+	ProjectSection(SolutionItems) = preProject
+		..\build.bat = ..\build.bat
+		..\build.fsx = ..\build.fsx
+		..\paket.dependencies = ..\paket.dependencies
+	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsInst", "FsInst\FsInst.fsproj", "{1A0244BB-970E-43F5-96E4-3812D81D6BB2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1A0244BB-970E-43F5-96E4-3812D81D6BB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A0244BB-970E-43F5-96E4-3812D81D6BB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A0244BB-970E-43F5-96E4-3812D81D6BB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A0244BB-970E-43F5-96E4-3812D81D6BB2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

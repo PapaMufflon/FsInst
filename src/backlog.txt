@@ -1,0 +1,14 @@
+open questions:
+- simulate installationPackage vs simulate msi
+- ErrorCodeBuilder...
+  - read more of computation expressions...
+  - how to handle finally { close handles }? --> think
+
+
+backlog:
+- files and folders basic
+- product and installer properties
+- shortcuts
+- csproj type provider
+- msi type provider
+- custom actions

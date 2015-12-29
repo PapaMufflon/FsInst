@@ -1,9 +1,5 @@
 open questions:
 - simulate installationPackage vs simulate msi
-- ErrorCodeBuilder...
-  - read more of computation expressions...
-  - how to handle finally { close handles }? --> think
-
 
 backlog:
 - files and folders basic

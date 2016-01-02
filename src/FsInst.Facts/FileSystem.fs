@@ -1,7 +1,6 @@
 ﻿namespace FsInst
 
-module ``Programs and Features`` =
-    open System.IO
+module FileSystem =
     open Xunit
     open FsUnit.Xunit
     open FsInst.Core
@@ -9,20 +8,23 @@ module ``Programs and Features`` =
     open FsInst.Simulation.InstallationPackage
 
     [<Fact>]
-    let ``get the publisher from the manufacturer property`` () =
+    let ``creates a folder if there will be an item in it`` () =
+        let Test = Folder("Test", None, [])
+
         let installationPackage =
             InstallationPackage
-            |> copyright "Acme Ltd."
+            |> createFolder Test
+            |> installFile "FileSystem.fs" into Test
 
         let simulation =
             installationPackage
             |> simulate
 
-        simulation.ControlPanel.ProgramsAndFeatures.Publisher |> should equal "Acme Ltd."
+        (simulation.FileSystem.InstallationDrive/"Test").Name |> should equal Test.Name
 
         let simulationOfMsi =
             installationPackage
             |> msi
             |> FsInst.Simulation.Msi.simulate
-
-        simulationOfMsi.ControlPanel.ProgramsAndFeatures.Publisher |> should equal "Acme Ltd."
+            
+        (simulationOfMsi.FileSystem.InstallationDrive/"Test").Name |> should equal Test.Name

@@ -4,19 +4,26 @@ module Core =
     open System
 
     type File(fileName:string) =
+        let id = "f" +  Guid.NewGuid().ToString("N").ToUpper()
+
         member x.FileName = fileName
-        member x.Id = Guid.NewGuid().ToString()
+        member x.Id = id
 
     type Component(files:File list) =
+        let name = "c" + Guid.NewGuid().ToString("N").ToUpper()
+        let id = sprintf "{%s}" (Guid.NewGuid().ToString().ToUpper())
+
         member x.Files = files
-        member x.Name = Guid.NewGuid().ToString()
-        member x.Id = Guid.NewGuid().ToString()
+        member x.Name = name
+        member x.Id = id
     
     type Folder(name:string, parent:Folder option, components:Component list) =
+        let id = "d" + Guid.NewGuid().ToString("N").ToUpper()
+
         member x.Name = name
         member x.Parent = parent
         member x.Components = components
-        member x.Id = Guid.NewGuid().ToString()
+        member x.Id = id
 
         new(name:string, parent:Folder option) = Folder(name, parent, [])
         new(name:string) = Folder(name, None, [])

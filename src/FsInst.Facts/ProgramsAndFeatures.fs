@@ -22,7 +22,9 @@ module ``Programs and Features`` =
 
         let simulationOfMsi =
             installationPackage
-            |> msi
+            |> msi "publisher.msi"
             |> FsInst.Simulation.Msi.simulate
 
         simulationOfMsi.ControlPanel.ProgramsAndFeatures.Publisher |> should equal "Acme Ltd."
+
+        File.Delete("publisher.msi")

@@ -1,6 +1,7 @@
 ﻿namespace FsInst
 
 module FileSystem =
+    open System.IO
     open Xunit
     open FsUnit.Xunit
     open FsInst.Core
@@ -13,18 +14,19 @@ module FileSystem =
 
         let installationPackage =
             InstallationPackage
+            |> copyright "Acme Inc."
             |> createFolder Test
-            |> installFile "FileSystem.fs" into Test
+            |> installFile "FsInst.dll" into Test
 
-        let simulation =
-            installationPackage
-            |> simulate
+        let simulation = simulate installationPackage
 
         (simulation.FileSystem.InstallationDrive/"Test").Name |> should equal Test.Name
 
-        let simulationOfMsi =
+        let simulationOfMsi = 
             installationPackage
-            |> msi
+            |> msi "createFolder.msi"
             |> FsInst.Simulation.Msi.simulate
             
         (simulationOfMsi.FileSystem.InstallationDrive/"Test").Name |> should equal Test.Name
+
+        File.Delete("createFolder.msi")

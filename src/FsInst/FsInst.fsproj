@@ -34,6 +34,12 @@
     <DocumentationFile>bin\Release\FsInst.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Deployment.Compression">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\WiX Toolset v3.10\SDK\Microsoft.Deployment.Compression.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Deployment.Compression.Cab">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\WiX Toolset v3.10\SDK\Microsoft.Deployment.Compression.Cab.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Deployment.WindowsInstaller">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\WiX Toolset v3.10\SDK\Microsoft.Deployment.WindowsInstaller.dll</HintPath>
     </Reference>

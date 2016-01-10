@@ -1,8 +1,10 @@
 open questions:
-- simulate installationPackage vs simulate msi
+- how to system test?
 
 backlog:
 - files and folders basic
+  - test for several files/folders
+  - introduce ProgramFilesFolder etc.
 - product and installer properties
 - shortcuts
 - csproj type provider

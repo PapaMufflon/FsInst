@@ -1,6 +1,7 @@
 ﻿namespace FsInst
 
 module FileSystem =
+    open System.Diagnostics
     open System.IO
     open Xunit
     open FsUnit.Xunit
@@ -28,5 +29,15 @@ module FileSystem =
             |> FsInst.Simulation.Msi.simulate
             
         (simulationOfMsi.FileSystem.InstallationDrive/"Test").Name |> should equal Test.Name
+
+        use installProcess = Process.Start(@"C:\Windows\System32\msiexec.exe", " /i createFolder.msi /quiet")
+        installProcess.WaitForExit()
+        
+        File.Exists(@"C:\Test\FsInst.dll") |> should be True
+
+        use uninstallProcess = Process.Start(@"C:\Windows\System32\msiexec.exe", " /x createFolder.msi /quiet")
+        uninstallProcess.WaitForExit()
+
+        File.Exists(@"C:\Test\FsInst.dll") |> should be False
 
         File.Delete("createFolder.msi")

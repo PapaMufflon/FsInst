@@ -7,7 +7,7 @@ module ``Programs and Features`` =
     open FsInst.Core
     open FsInst.Simulation
     open FsInst.Simulation.InstallationPackage
-
+    
     [<Fact>]
     let ``get the publisher from the manufacturer property`` () =
         let installationPackage =

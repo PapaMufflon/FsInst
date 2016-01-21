@@ -1,5 +1,6 @@
 open questions:
 - how to system test?
+- how to force execute sequence? inheritance?
 
 backlog:
 - files and folders basic

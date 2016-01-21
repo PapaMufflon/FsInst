@@ -63,8 +63,10 @@ module Core =
 
         { installationPackage with Folders = folderWithFile :: otherFolders }
 
-    let installFiles (files:File list) into folder (installationPackage:InstallationPackage) =
+    let installFiles (fileNames:string list) into folder (installationPackage:InstallationPackage) =
         let otherFolders = List.except [ folder ] installationPackage.Folders
-        let folderWithFile = Folder(folder.Name, folder.Parent, Component(files) :: folder.Components)
+        let files = List.map (fun fileName -> File(fileName)) fileNames
+        let components = List.map (fun file -> Component([file])) files
+        let folderWithFile = Folder(folder.Name, folder.Parent, folder.Components |> List.append components)
 
         { installationPackage with Folders = folderWithFile :: otherFolders }

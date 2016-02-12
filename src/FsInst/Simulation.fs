@@ -2,37 +2,35 @@
 
 [<AutoOpen>]
 module Types =
+    open System
+
     type ProgramsAndFeatures = 
         { Publisher : string }
     
     type ControlPanel = 
         { ProgramsAndFeatures : ProgramsAndFeatures }
     
-    type Folder = 
-        { Name : string
-          Parent : Folder option
-          Children : Folder list
-          Files : string list }
-    
-    type Browsable = 
-        | BrowsableFolder of Folder
-        | BrowsableFile of string
-    
-    let (/) (x : obj) (name : string) = 
-        let sub folder = 
-            if folder.Children |> List.exists (fun f -> f.Name = name) then 
-                BrowsableFolder(List.exactlyOne (folder.Children |> List.where (fun (f : Folder) -> f.Name = name)))
-            else
-                BrowsableFile(List.exactlyOne (folder.Files |> List.where (fun s -> s = name)))
+    type Folder = {
+        Id : string
+        Name : string
+        Parent : Folder option
+        Children : Folder list
+        Files : string list } with
 
-        match x with
-        | :? Browsable as browsable -> 
+        static member (/)(folder, name) =
+            if folder.Children |> List.exists (fun f -> f.Name = name) then 
+                InstalledFolder(List.exactlyOne (folder.Children |> List.where (fun (f : Folder) -> f.Name = name)))
+            else
+                InstalledFile(List.exactlyOne (folder.Files |> List.where (fun s -> s = name)))
+
+    and Browsable = 
+        | InstalledFolder of Folder
+        | InstalledFile of string with
+        static member (/)(browsable, name) = 
             match browsable with
-            | BrowsableFolder folder -> sub folder
+            | InstalledFolder folder -> folder/name
             | _ -> failwith "a file cannot have children."
-        | :? Folder as folder -> sub folder
-        | _ -> failwith "this object is cannot have children."
-    
+
     type FileSystem = 
         { InstallationDrive : Folder }
     
@@ -43,17 +41,22 @@ module Types =
                 |> List.groupBy (fun (parentId, folder) -> parentId)
                 |> List.map (fun (key, children) -> (key, List.map (fun (sameKey, child) -> child) children))
 
-            folders
+            let roots =
+                folders
+                |> List.filter (fun (parentId, folder) -> String.IsNullOrEmpty(parentId))
+
+            roots
             |> List.map (fun (parentId, folder) -> 
                 let suitableChildren =
                     parentsWithChildren
-                    |> List.tryFind (fun (pId, children) -> parentId = pId)
+                    |> List.tryFind (fun (pId, children) -> folder.Id = pId)
 
                 match suitableChildren with
-                | Some(parentId, children) -> { folder with Children = children }
+                | Some(pId, children) -> { folder with Children = children }
                 | None -> folder)
             
-        { Name = "root"
+        { Id = String.Empty
+          Name = "root"
           Parent = None
           Children = rootFolders folders
           Files = [] }
@@ -80,7 +83,8 @@ module InstallationPackage =
             installationPackage.Folders
             |> List.map (fun f -> 
                 (parentToId f.Parent,
-                 { Name = f.Name
+                 { Id = f.Id
+                   Name = f.Name
                    Parent = None
                    Children = []
                    Files = getFiles f }))
@@ -88,7 +92,8 @@ module InstallationPackage =
         { ControlPanel = { ProgramsAndFeatures = { Publisher = installationPackage.Manufacturer } }
           FileSystem = { InstallationDrive = toFileSystem convertedFolders } }
 
-module Msi = 
+module Msi =
+    open System
     open System.IO
     open System.Linq
     open Microsoft.Deployment.WindowsInstaller
@@ -105,12 +110,15 @@ module Msi =
                 |> List.map (fun c -> (List.ofSeq (database.Files.Where(fun f -> f.Component_ = c.Component)) |> List.exactlyOne).FileName)
             
             let convertedFolders = 
-                directories |> List.map (fun (name, id, parent) -> 
-                                   (parent, 
-                                    { Name = name
-                                      Parent = None
-                                      Children = []
-                                      Files = gatherFiles id database }))
+                directories
+                |> List.filter (fun (name, id, parent) -> name <> "TARGETDIR")
+                |> List.map (fun (name, id, parent) -> 
+                    ((if parent = "TARGETDIR" then String.Empty else parent),
+                     { Id = id
+                       Name = name
+                       Parent = None
+                       Children = []
+                       Files = gatherFiles id database }))
 
             { InstallationDrive = toFileSystem convertedFolders }
         

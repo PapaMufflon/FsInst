@@ -2,5 +2,5 @@ source https://www.nuget.org/api/v2/
 
 nuget FAKE
 nuget FsUnit.xUnit
+nuget FsUnit
 nuget Wix.Toolset
-nuget xunit.runner.console

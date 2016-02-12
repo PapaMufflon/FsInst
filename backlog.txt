@@ -1,11 +1,9 @@
 open questions:
-- how to system test?
 - how to force execute sequence? inheritance?
 
 backlog:
-- files and folders basic
-  - test for several files/folders
-  - introduce ProgramFilesFolder etc.
+- classes --> records with private fields, ctors and active patterns!?
+- introduce ProgramFilesFolder etc.
 - product and installer properties
 - shortcuts
 - csproj type provider

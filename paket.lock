@@ -1,11 +1,15 @@
 NUGET
   remote: https://www.nuget.org/api/v2
   specs:
-    FAKE (4.12.2)
+    FAKE (4.16.1)
     FSharp.Core (4.0.0.1)
+    FsUnit (1.4.1)
+      FSharp.Core (>= 3.1.2.5)
+      NUnit (2.6.4)
     FsUnit.xUnit (1.4.1)
       FSharp.Core (>= 3.1.2.5)
       xunit (2.1.0)
+    NUnit (2.6.4)
     System.Collections (4.0.10) - framework: dnxcore50
       System.Diagnostics.Debug (>= 4.0.0) - framework: dnxcore50
       System.Resources.ResourceManager (>= 4.0.0) - framework: dnxcore50
@@ -170,4 +174,3 @@ NUGET
       System.Threading.Tasks (>= 4.0.0) - framework: dnxcore50
       xunit.abstractions (>= 2.0.0) - framework: dnxcore50
       xunit.extensibility.core (2.1.0) - framework: >= net45, dnx451, dnxcore50, monoandroid, monotouch, xamarinios, winv4.5, wpv8.1, wpv8.0
-    xunit.runner.console (2.1.0)

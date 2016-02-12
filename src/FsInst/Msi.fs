@@ -95,7 +95,6 @@ module Msi =
             database.SummaryInfo.WordCount <- 2
 
             database.Execute("INSERT INTO Directory (Directory, DefaultDir) VALUES ('TARGETDIR', 'SourceDir')")
-            database.Execute("INSERT INTO Media (DiskId, LastSequence, Cabinet) VALUES ('1', '1', '#cabinet.cab')")
             database.Execute("INSERT INTO Feature (Feature, Display, Level, Attributes) VALUES ('Complete', '2', '1', '0')")
 
             database.Execute("INSERT INTO Property (Property, Value) VALUES ('LIMITUI', '1')")
@@ -120,7 +119,8 @@ module Msi =
                 | None -> "TARGETDIR"
             
                 let dic = new Dictionary<string, string>()
-                
+                let mutable fileSequenceCounter = 1
+
                 for folder in folders do
                     database.Execute(sprintf "INSERT INTO Directory (Directory, Directory_Parent, DefaultDir) VALUES ('%s', '%s', '%s')" folder.Id (formatParent folder.Parent) folder.Name)
 
@@ -130,7 +130,9 @@ module Msi =
 
                         c.Files
                         |> List.iteri (fun i f ->
-                            database.Execute(sprintf "INSERT INTO File (File, Component_, FileName, FileSize, Attributes, Sequence) VALUES ('%s', '%s', '%s', %d, %d, %d)" f.Id c.Name f.FileName 1 512 (i + 1))
+                            database.Execute(sprintf "INSERT INTO File (File, Component_, FileName, FileSize, Attributes, Sequence) VALUES ('%s', '%s', '%s', %d, %d, %d)" f.Id c.Name f.FileName 1 512 fileSequenceCounter)
+                            fileSequenceCounter <- fileSequenceCounter + 1
+
                             dic.Add(f.Id, f.FileName)
 
                             let hashes = Array.zeroCreate 4
@@ -139,17 +141,20 @@ module Msi =
 
                 use view = database.OpenView("SELECT `Name`,`Data` FROM _Streams")
 
-                let cabinet = CabInfo("cabinet.cab")
+                let cabinetFileName = sprintf "cabinet.%s.cab" (Guid.NewGuid().ToString("N").Substring(0, 5))
+                let cabinet = CabInfo(cabinetFileName)
                 cabinet.PackFileSet(".", dic, CompressionLevel.Max, null)
 
                 let record = database.CreateRecord(2)
-                record.SetString(1, "cabinet.cab")
-                record.SetStream(2, "cabinet.cab")
+                record.SetString(1, cabinetFileName)
+                record.SetStream(2, cabinetFileName)
 
                 view.Insert(record)
                 view.Execute()
 
-                File.Delete("cabinet.cab")
+                cabinet.Delete()
+
+                database.Execute(sprintf "INSERT INTO Media (DiskId, LastSequence, Cabinet) VALUES ('1', '%d', '#%s')" fileSequenceCounter cabinetFileName)
 
             database
 

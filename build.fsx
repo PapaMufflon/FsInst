@@ -1,10 +1,5 @@
 ﻿#r @"packages/FAKE/tools/FakeLib.dll"
-open System
-open System.IO
 open Fake
-open Fake.Git
-open Fake.ReportGeneratorHelper
-open Fake.OpenCoverHelper
 open Fake.Testing
 
 let buildDir = "./build"
@@ -25,6 +20,11 @@ Target "Test" (fun _ ->
       |> xUnit (fun p -> { p with ToolPath = "./packages/xunit.runner.console/tools/xunit.console.exe" })
 )
 
+Target "SystemTest" (fun _ ->
+    !! (buildDir + @"\*SystemTests.dll") 
+      |> xUnit (fun p -> { p with ToolPath = "./packages/xunit.runner.console/tools/xunit.console.exe" })
+)
+
 Target "Default" (fun _ ->
     trace "Have fun using FsInst!!!"
 )
@@ -32,6 +32,7 @@ Target "Default" (fun _ ->
 "Clean"
   ==> "Build"
   ==> "Test"
+  ==> "SystemTest"
   ==> "Default"
 
 RunTargetOrDefault "Default"

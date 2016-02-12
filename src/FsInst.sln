@@ -16,6 +16,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsInst", "FsInst\FsInst.fsp
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsInst.Facts", "FsInst.Facts\FsInst.Facts.fsproj", "{9AC264A9-48EF-4A4F-BB10-15975C50439F}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsInst.SystemTests", "FsInst.SystemTests\FsInst.SystemTests.fsproj", "{F0510EEF-0B95-4DF2-9522-85EBED5DCAF4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,10 @@ Global
 		{9AC264A9-48EF-4A4F-BB10-15975C50439F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AC264A9-48EF-4A4F-BB10-15975C50439F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AC264A9-48EF-4A4F-BB10-15975C50439F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0510EEF-0B95-4DF2-9522-85EBED5DCAF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0510EEF-0B95-4DF2-9522-85EBED5DCAF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0510EEF-0B95-4DF2-9522-85EBED5DCAF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0510EEF-0B95-4DF2-9522-85EBED5DCAF4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

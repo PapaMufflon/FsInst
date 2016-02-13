@@ -56,3 +56,14 @@ module FileSystem =
 
         simulation.FileSystem.InstallationDrive/"Test"/"FsInst.dll" |> should equal (InstalledFile("FsInst.dll"))
         simulation.FileSystem.InstallationDrive/"Test"/"SubFolder"/"FsInst.Facts.dll" |> should equal (InstalledFile("FsInst.Facts.dll"))
+
+    [<Fact>]
+    let ``defines a variable for the program files folder`` () =
+        let installationPackage =
+            InstallationPackage
+            |> copyright "Acme Inc."
+            |> installFile "FsInst.dll" into ProgramFiles
+        
+        let simulation = simulate installationPackage
+
+        simulation.FileSystem.InstallationDrive/ProgramFiles/"FsInst.dll" |> should equal (InstalledFile("FsInst.dll"))

@@ -62,3 +62,16 @@ module FileSystem =
         simulationOfMsi.FileSystem.InstallationDrive/"Test"/"SubFolder"/"FsInst.Facts.dll" |> should equal (InstalledFile("FsInst.Facts.dll"))
 
         File.Delete("hierarchicalFoldersSimulation.msi")
+
+    [<Fact>]
+    let ``defines a variable for the program files folder`` () =
+        let simulationOfMsi =
+            InstallationPackage
+            |> copyright "Acme Inc."
+            |> installFile "FsInst.dll" into ProgramFiles
+            |> msi "programFilesFolderSimulation.msi"
+            |> FsInst.Simulation.Msi.simulate
+        
+        simulationOfMsi.FileSystem.InstallationDrive/ProgramFiles/"FsInst.dll" |> should equal (InstalledFile("FsInst.dll"))
+
+        File.Delete("programFilesFolderSimulation.msi")

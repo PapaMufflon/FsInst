@@ -17,18 +17,26 @@ module Types =
         Children : Folder list
         Files : string list } with
 
-        static member (/)(folder, name) =
-            if folder.Children |> List.exists (fun f -> f.Name = name) then 
-                InstalledFolder(List.exactlyOne (folder.Children |> List.where (fun (f : Folder) -> f.Name = name)))
+        static member (/)(folder:Folder, subfolder:obj) =
+            let subFolderName =
+                match subfolder with
+                | :? Folder as sub -> sub.Name
+                | :? FsInst.Core.Folder as sub -> sub.Name
+                | :? String as s -> s
+                | _ -> failwith "not supported"
+
+            if folder.Children |> List.exists (fun f -> f.Name = subFolderName) then 
+                InstalledFolder(List.exactlyOne (folder.Children |> List.where (fun (f : Folder) -> f.Name = subFolderName)))
             else
-                InstalledFile(List.exactlyOne (folder.Files |> List.where (fun s -> s = name)))
+                InstalledFile(List.exactlyOne (folder.Files |> List.where (fun s -> s = subFolderName)))
 
     and Browsable = 
         | InstalledFolder of Folder
         | InstalledFile of string with
+        
         static member (/)(browsable, name) = 
             match browsable with
-            | InstalledFolder folder -> folder/name
+            | InstalledFolder folder -> folder/(name :> obj)
             | _ -> failwith "a file cannot have children."
 
     type FileSystem = 

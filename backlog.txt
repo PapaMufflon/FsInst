@@ -1,10 +1,10 @@
 open questions:
 - how to force execute sequence? inheritance?
+- classes --> records with private fields, ctors and active patterns!?
 
 backlog:
-- classes --> records with private fields, ctors and active patterns!?
-- introduce ProgramFilesFolder etc.
 - product and installer properties
+- introduce Manufacturer and Product property
 - shortcuts
 - csproj type provider
 - msi type provider

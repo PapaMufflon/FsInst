@@ -90,7 +90,7 @@ module Msi =
             database.SummaryInfo.Comments <- "This installer database contains the logic and data required to install Foobar 1.0."
             database.SummaryInfo.Keywords <- "Installer"
             database.SummaryInfo.RevisionNumber <-  productCode
-            database.SummaryInfo.Template <- "Intel;1033"
+            database.SummaryInfo.Template <- "x64;1033"
             database.SummaryInfo.PageCount <- 200
             database.SummaryInfo.WordCount <- 2
 

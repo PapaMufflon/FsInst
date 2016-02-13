@@ -4,7 +4,6 @@ module FileSystem =
     open System.IO
     open FsUnit.Xunit
     open FsInst.Core
-    open FsInst.Simulation
     open Xunit
     open FsInst
 
@@ -17,7 +16,7 @@ module FileSystem =
             |> copyright "Acme Inc."
             |> createFolder Test
             |> installFile "FsInst.dll" into Test
-            |> msi "createFolder.msi"
+            |> msi "createFolderSimulation.msi"
             |> FsInst.Simulation.Msi.simulate
             
         let msiFolder = simulationOfMsi.FileSystem.InstallationDrive/"Test"
@@ -26,7 +25,7 @@ module FileSystem =
         | InstalledFolder f -> f.Name |> should equal Test.Name
         | _ -> failwith "Test is not a folder."
 
-        File.Delete("createFolder.msi")
+        File.Delete("createFolderSimulation.msi")
 
     [<Fact>]
     let ``can have multiple files in one folder`` () =
@@ -37,13 +36,13 @@ module FileSystem =
             |> copyright "Acme Inc."
             |> createFolder Test
             |> installFiles ["FsInst.dll"; "FsInst.Facts.dll"] into Test
-            |> msi "multipleFiles.msi"
+            |> msi "multipleFilesSimulation.msi"
             |> FsInst.Simulation.Msi.simulate
 
         simulationOfMsi.FileSystem.InstallationDrive/"Test"/"FsInst.dll" |> should equal (InstalledFile("FsInst.dll"))
         simulationOfMsi.FileSystem.InstallationDrive/"Test"/"FsInst.Facts.dll" |> should equal (InstalledFile("FsInst.Facts.dll"))
 
-        File.Delete("multipleFiles.msi")
+        File.Delete("multipleFilesSimulation.msi")
 
     [<Fact>]
     let ``can have hierarchical folders`` () =
@@ -56,10 +55,10 @@ module FileSystem =
             |> createFolder subFolder
             |> installFile "FsInst.dll" into folder
             |> installFile "FsInst.Facts.dll" into subFolder
-            |> msi "hierarchicalFolders.msi"
+            |> msi "hierarchicalFoldersSimulation.msi"
             |> FsInst.Simulation.Msi.simulate
 
         simulationOfMsi.FileSystem.InstallationDrive/"Test"/"FsInst.dll" |> should equal (InstalledFile("FsInst.dll"))
         simulationOfMsi.FileSystem.InstallationDrive/"Test"/"SubFolder"/"FsInst.Facts.dll" |> should equal (InstalledFile("FsInst.Facts.dll"))
 
-        File.Delete("hierarchicalFolders.msi")
+        File.Delete("hierarchicalFoldersSimulation.msi")

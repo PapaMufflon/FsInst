@@ -7,77 +7,93 @@ module FileSystem =
     open FsInst.Core
     open Xunit
 
+    let installAndTest installationPackage msiFileName installationAssertion uninstallationAssertion =
+        installationPackage
+        |> msi msiFileName
+        |> ignore
+
+        use installProcess = Process.Start(@"C:\Windows\System32\msiexec.exe", sprintf " /i %s /quiet" msiFileName)
+        installProcess.WaitForExit()
+
+        installationAssertion ()
+
+        use uninstallProcess = Process.Start(@"C:\Windows\System32\msiexec.exe", sprintf " /x %s /quiet" msiFileName)
+        uninstallProcess.WaitForExit()
+
+        uninstallationAssertion ()
+
+        File.Delete(msiFileName)
+
     [<Fact>]
     let ``creates a folder if there is an item in it`` () =
         let Test = InstallationDrive/"Test"
 
-        InstallationPackage
-        |> copyright "Acme Inc."
-        |> createFolder Test
-        |> installFile "FsInst.dll" into Test
-        |> msi "createFolder.msi"
-        |> ignore
+        let installationPackage =
+            InstallationPackage
+            |> copyright "Acme Inc."
+            |> createFolder Test
+            |> installFile "FsInst.dll" into Test
+
+        installAndTest
+            installationPackage
+            "createFolder.msi"
+            (fun () -> File.Exists(@"C:\Test\FsInst.dll") |> should be True)
+            (fun () -> File.Exists(@"C:\Test\FsInst.dll") |> should be False)
             
-        use installProcess = Process.Start(@"C:\Windows\System32\msiexec.exe", " /i createFolder.msi /quiet")
-        installProcess.WaitForExit()
-        
-        File.Exists(@"C:\Test\FsInst.dll") |> should be True
-
-        use uninstallProcess = Process.Start(@"C:\Windows\System32\msiexec.exe", " /x createFolder.msi /quiet")
-        uninstallProcess.WaitForExit()
-
-        File.Exists(@"C:\Test\FsInst.dll") |> should be False
-
-        File.Delete("createFolder.msi")
-
     [<Fact>]
     let ``can have multiple files in one folder`` () =
         let Test = InstallationDrive/"Test"
 
-        InstallationPackage
-        |> copyright "Acme Inc."
-        |> createFolder Test
-        |> installFiles ["FsInst.dll"; "FsInst.Facts.dll"] into Test
-        |> msi "multipleFiles.msi"
-        |> ignore
+        let installationPackage =
+            InstallationPackage
+            |> copyright "Acme Inc."
+            |> createFolder Test
+            |> installFiles ["FsInst.dll"; "FsInst.Facts.dll"] into Test
 
-        use installProcess = Process.Start(@"C:\Windows\System32\msiexec.exe", " /i multipleFiles.msi /quiet")
-        installProcess.WaitForExit()
-        
-        File.Exists(@"C:\Test\FsInst.dll") |> should be True
-        File.Exists(@"C:\Test\FsInst.Facts.dll") |> should be True
-
-        use uninstallProcess = Process.Start(@"C:\Windows\System32\msiexec.exe", " /x multipleFiles.msi /quiet")
-        uninstallProcess.WaitForExit()
-
-        File.Exists(@"C:\Test\FsInst.dll") |> should be False
-        File.Exists(@"C:\Test\FsInst.Facts.dll") |> should be False
-
-        File.Delete("multipleFiles.msi")
+        installAndTest
+            installationPackage
+            "multipleFiles.msi"
+            (fun () ->
+                File.Exists(@"C:\Test\FsInst.dll") |> should be True
+                File.Exists(@"C:\Test\FsInst.Facts.dll") |> should be True)
+            (fun () ->
+                File.Exists(@"C:\Test\FsInst.dll") |> should be False
+                File.Exists(@"C:\Test\FsInst.Facts.dll") |> should be False)
 
     [<Fact>]
     let ``can have hierarchical folders`` () =
         let folder = InstallationDrive/"Test"
         let subFolder = folder/"SubFolder"
 
-        InstallationPackage
-        |> copyright "Acme Inc."
-        |> createFolder subFolder
-        |> installFile "FsInst.dll" into folder
-        |> installFile "FsInst.Facts.dll" into subFolder
-        |> msi "hierarchicalFolders.msi"
-        |> ignore
+        let installationPackage =
+            InstallationPackage
+            |> copyright "Acme Inc."
+            |> createFolder subFolder
+            |> installFile "FsInst.dll" into folder
+            |> installFile "FsInst.Facts.dll" into subFolder
 
-        use installProcess = Process.Start(@"C:\Windows\System32\msiexec.exe", " /i hierarchicalFolders.msi /quiet")
-        installProcess.WaitForExit()
+        installAndTest
+            installationPackage
+            "hierarchicalfolders.msi"
+            (fun () ->
+                File.Exists(@"C:\Test\FsInst.dll") |> should be True
+                File.Exists(@"C:\Test\SubFolder\FsInst.Facts.dll") |> should be True)
+            (fun () ->
+                File.Exists(@"C:\Test\FsInst.dll") |> should be False
+                File.Exists(@"C:\Test\SubFolder\FsInst.Facts.dll") |> should be False)
+
+    [<Fact>]
+    let ``defines a variable for the program files folder`` () =
+        let installationPackage =
+            InstallationPackage
+            |> copyright "Acme Inc."
+            |> installFile "FsInst.dll" into ProgramFiles
         
-        File.Exists(@"C:\Test\FsInst.dll") |> should be True
-        File.Exists(@"C:\Test\SubFolder\FsInst.Facts.dll") |> should be True
+        let programFilesFolder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles)
+        let installedFile = Path.Combine(programFilesFolder, "FsInst.dll")
 
-        use uninstallProcess = Process.Start(@"C:\Windows\System32\msiexec.exe", " /x hierarchicalFolders.msi /quiet")
-        uninstallProcess.WaitForExit()
-
-        File.Exists(@"C:\Test\FsInst.dll") |> should be False
-        File.Exists(@"C:\Test\SubFolder\FsInst.Facts.dll") |> should be False
-
-        File.Delete("hierarchicalFolders.msi")
+        installAndTest
+            installationPackage
+            "programFilesFolder.msi"
+            (fun () -> File.Exists(installedFile) |> should be True)
+            (fun () -> File.Exists(installedFile) |> should be False)

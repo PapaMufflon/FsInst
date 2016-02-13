@@ -34,6 +34,8 @@ module Core =
 
     let InstallationDrive = { Id = newGuid "d"; Name = "TARGETDIR"; Parent = None; Components = [] }
 
+    let ProgramFiles = { Id = "ProgramFiles64Folder"; Name = "."; Parent = None; Components = [] }
+
     type InstallationPackage = {
         Manufacturer : string
         Folders: Folder list }

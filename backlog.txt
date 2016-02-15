@@ -3,7 +3,7 @@ open questions:
 - classes --> records with private fields, ctors and active patterns!?
 
 backlog:
-- product and installer properties
+- installer properties
 - introduce Manufacturer and Product property
 - shortcuts
 - csproj type provider

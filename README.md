@@ -11,6 +11,11 @@ let Test = Folder("Test", None, []) // this will go away...
 let installationPackage =
     InstallationPackage
     |> copyright "Acme Inc."
+    |> installing
+        { Product with
+          Name = "Foobar 1.0";
+          Language = ``en-US``
+          Version = V 1 0 0 }
     |> createFolder Test
     |> installFile "FsInst.dll" into Test
 

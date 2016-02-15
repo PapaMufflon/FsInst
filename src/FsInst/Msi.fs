@@ -82,12 +82,12 @@ module Msi =
         let writeSummaryInfo installationPackage (database:Database) =
             let productCode = Guid.NewGuid().ToString("B").ToUpper()
             let upgradeCode = Guid.NewGuid().ToString("B").ToUpper()
-            let productName = "Foobar 1.0"
+            let productName = installationPackage.Product.Name
 
             database.SummaryInfo.Title <- "Installation Database"
             database.SummaryInfo.Author <- installationPackage.Manufacturer
             database.SummaryInfo.Subject <- productName
-            database.SummaryInfo.Comments <- "This installer database contains the logic and data required to install Foobar 1.0."
+            database.SummaryInfo.Comments <- sprintf "This installer database contains the logic and data required to install %s" productName
             database.SummaryInfo.Keywords <- "Installer"
             database.SummaryInfo.RevisionNumber <-  productCode
             database.SummaryInfo.Template <- "x64;1033"
@@ -100,8 +100,11 @@ module Msi =
             database.Execute("INSERT INTO Property (Property, Value) VALUES ('LIMITUI', '1')")
             database.Execute(sprintf "INSERT INTO Property (Property, Value) VALUES ('ProductCode', '%s')" productCode)
             database.Execute("INSERT INTO Property (Property, Value) VALUES ('ProductLanguage', '1033')")
-            database.Execute(sprintf "INSERT INTO Property (Property, Value) VALUES ('ProductName', '%s')" productName)
-            database.Execute("INSERT INTO Property (Property, Value) VALUES ('ProductVersion', '0.1.0')")
+            
+            if productName <> String.Empty then
+                database.Execute(sprintf "INSERT INTO Property (Property, Value) VALUES ('ProductName', '%s')" productName)
+
+            database.Execute(sprintf "INSERT INTO Property (Property, Value) VALUES ('ProductVersion', '%s')" (installationPackage.Product.Version.ToString()))
             database.Execute(sprintf "INSERT INTO Property (Property, Value) VALUES ('UpgradeCode', '%s')" upgradeCode)
 
             database

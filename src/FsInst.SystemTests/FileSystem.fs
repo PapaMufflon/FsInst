@@ -31,6 +31,9 @@ module FileSystem =
         let installationPackage =
             InstallationPackage
             |> copyright "Acme Inc."
+            |> installing
+                { Product with
+                    Name = "Foobar 1.0" }
             |> createFolder Test
             |> installFile "FsInst.dll" into Test
 
@@ -47,6 +50,9 @@ module FileSystem =
         let installationPackage =
             InstallationPackage
             |> copyright "Acme Inc."
+            |> installing
+                { Product with
+                    Name = "Foobar 1.0" }
             |> createFolder Test
             |> installFiles ["FsInst.dll"; "FsInst.Facts.dll"] into Test
 
@@ -68,6 +74,9 @@ module FileSystem =
         let installationPackage =
             InstallationPackage
             |> copyright "Acme Inc."
+            |> installing
+                { Product with
+                    Name = "Foobar 1.0" }
             |> createFolder subFolder
             |> installFile "FsInst.dll" into folder
             |> installFile "FsInst.Facts.dll" into subFolder
@@ -87,6 +96,9 @@ module FileSystem =
         let installationPackage =
             InstallationPackage
             |> copyright "Acme Inc."
+            |> installing
+                { Product with
+                    Name = "Foobar 1.0" }
             |> installFile "FsInst.dll" into ProgramFiles
         
         let programFilesFolder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles)

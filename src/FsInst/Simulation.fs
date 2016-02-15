@@ -3,9 +3,13 @@
 [<AutoOpen>]
 module Types =
     open System
+    open System.Globalization
 
-    type ProgramsAndFeatures = 
-        { Publisher : string }
+    type ProgramsAndFeatures = {
+        Publisher : string
+        Name : string
+        Language : CultureInfo
+        Version : FsInst.Core.Version }
     
     type ControlPanel = 
         { ProgramsAndFeatures : ProgramsAndFeatures }
@@ -97,15 +101,24 @@ module InstallationPackage =
                    Children = []
                    Files = getFiles f }))
 
-        { ControlPanel = { ProgramsAndFeatures = { Publisher = installationPackage.Manufacturer } }
+        let programsAndFeatures = {
+            Publisher = installationPackage.Manufacturer
+            Name = installationPackage.Product.Name
+            Language = installationPackage.Product.Language
+            Version = installationPackage.Product.Version
+        }
+        
+        { ControlPanel = { ProgramsAndFeatures = programsAndFeatures }
           FileSystem = { InstallationDrive = toFileSystem convertedFolders } }
 
 module Msi =
     open System
     open System.IO
     open System.Linq
+    open System.Text.RegularExpressions
     open Microsoft.Deployment.WindowsInstaller
     open Microsoft.Deployment.WindowsInstaller.Linq
+    open FsInst.Core
     
     let simulate (msi : FileInfo) = 
         let readFilesAndFolders (database : QDatabase) = 
@@ -131,7 +144,28 @@ module Msi =
             { InstallationDrive = toFileSystem convertedFolders }
         
         use database = new QDatabase(msi.FullName, DatabaseOpenMode.ReadOnly)
-        let manufacturer = (database.ExecutePropertyQuery("Manufacturer"))
+        let manufacturer = database.ExecutePropertyQuery("Manufacturer")
+        let name = database.ExecutePropertyQuery("ProductName")
 
-        { ControlPanel = { ProgramsAndFeatures = { Publisher = manufacturer } }
+        let convertToVersion versionString =
+            let m = Regex.Match(versionString, "([0-9]+).([0-9]+).([0-9]+)")
+            
+            if m.Success then
+                V (Int32.Parse(m.Groups.[1].Value)) (Int32.Parse(m.Groups.[2].Value)) (Int32.Parse(m.Groups.[3].Value))
+            else
+                V 0 0 0
+
+        let version = convertToVersion (database.ExecutePropertyQuery("ProductVersion"))
+
+        let (|Int|_|) str =
+            match Int32.TryParse(str) with
+            | (true, int) -> Some(int)
+            | _ -> None
+
+        let language = ``en-US`` // default language
+//            match (database.ExecutePropertyQuery("ProductLanguage")) with
+//            | Int i -> if i = 1033 then ``en-US`` else failwith (sprintf "The language with ID %d is not supported." i)
+//            | s -> failwith (sprintf "The string %s for a language identifier is not supported." s)
+
+        { ControlPanel = { ProgramsAndFeatures = { Publisher = manufacturer; Name = name; Language = language; Version = version } }
           FileSystem = readFilesAndFolders database }

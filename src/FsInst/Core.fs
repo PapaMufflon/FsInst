@@ -2,6 +2,30 @@
 
 module Core =
     open System
+    open System.Globalization
+
+    type Version = {
+        Major : int
+        Minor : int
+        Build : int } with
+        override x.ToString() = sprintf "%d.%d.%d" x.Major x.Minor x.Build
+
+    type ProductSpecification = {
+        Name : string
+        Language : CultureInfo
+        Version : Version
+    }
+
+    let ``en-US`` = CultureInfo("en-US")
+
+    let V major minor build =
+        { Major = major; Minor = minor; Build = build}
+
+    let Product = {
+        Name = String.Empty
+        Language = ``en-US``
+        Version = V 1 0 0
+    }
 
     type File(fileName:string) =
         let id = "f" +  Guid.NewGuid().ToString("N").ToUpper()
@@ -38,14 +62,20 @@ module Core =
 
     type InstallationPackage = {
         Manufacturer : string
+        Product : ProductSpecification
         Folders: Folder list }
 
     let InstallationPackage = {
         Manufacturer = String.Empty
+        Product = Product
         Folders = [] }
 
     let copyright manufacturer installationPackage =
         { installationPackage with Manufacturer = manufacturer }
+
+    let installing product installationPackage =
+        { installationPackage with
+            Product = product }
 
     let rec createFolder (folder:Object) installationPackage =
         match folder with

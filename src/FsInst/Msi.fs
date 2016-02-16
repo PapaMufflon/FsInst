@@ -122,7 +122,7 @@ module Msi =
                 | None -> "TARGETDIR"
             
                 let dic = new Dictionary<string, string>()
-                let mutable fileSequenceCounter = 1
+                let fileSequenceCounter = ref 1
 
                 for folder in folders do
                     database.Execute(sprintf "INSERT INTO Directory (Directory, Directory_Parent, DefaultDir) VALUES ('%s', '%s', '%s')" folder.Id (formatParent folder.Parent) folder.Name)
@@ -133,8 +133,8 @@ module Msi =
 
                         c.Files
                         |> List.iteri (fun i f ->
-                            database.Execute(sprintf "INSERT INTO File (File, Component_, FileName, FileSize, Attributes, Sequence) VALUES ('%s', '%s', '%s', %d, %d, %d)" f.Id c.Name f.FileName 1 512 fileSequenceCounter)
-                            fileSequenceCounter <- fileSequenceCounter + 1
+                            database.Execute(sprintf "INSERT INTO File (File, Component_, FileName, FileSize, Attributes, Sequence) VALUES ('%s', '%s', '%s', %d, %d, %d)" f.Id c.Name f.FileName 1 512 !fileSequenceCounter)
+                            fileSequenceCounter := !fileSequenceCounter + 1
 
                             dic.Add(f.Id, f.FileName)
 
@@ -157,7 +157,7 @@ module Msi =
 
                 cabinet.Delete()
 
-                database.Execute(sprintf "INSERT INTO Media (DiskId, LastSequence, Cabinet) VALUES ('1', '%d', '#%s')" fileSequenceCounter cabinetFileName)
+                database.Execute(sprintf "INSERT INTO Media (DiskId, LastSequence, Cabinet) VALUES ('1', '%d', '#%s')" !fileSequenceCounter cabinetFileName)
 
             database
 

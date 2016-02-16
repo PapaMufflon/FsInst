@@ -54,6 +54,7 @@
     <Compile Include="Core.fs" />
     <Compile Include="Simulation.fs" />
     <Compile Include="Msi.fs" />
+    <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Deployment.Compression">
@@ -69,8 +70,8 @@
       <HintPath>..\..\packages\WiX.Toolset\tools\wix\sdk\Microsoft.Deployment.WindowsInstaller.Linq.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Private>True</Private>
+    <Reference Include="FSharp.Core">
+      <HintPath>..\..\packages\FSharp.Core\lib\net40\FSharp.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

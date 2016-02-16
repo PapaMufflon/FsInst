@@ -24,6 +24,13 @@ module FileSystem =
 
         File.Delete(msiFileName)
 
+    let targetDir =
+        let biggestDrive =
+            DriveInfo.GetDrives()
+            |> Array.maxBy (fun x -> x.AvailableFreeSpace)
+
+        biggestDrive.Name
+        
     [<Fact>]
     let ``creates a folder if there is an item in it`` () =
         let Test = InstallationDrive/"Test"
@@ -37,11 +44,13 @@ module FileSystem =
             |> createFolder Test
             |> installFile "FsInst.dll" into Test
 
+        let targetFile = sprintf @"%sTest\FsInst.dll" targetDir
+
         installAndTest
             installationPackage
             "createFolder.msi"
-            (fun () -> File.Exists(@"C:\Test\FsInst.dll") |> should be True)
-            (fun () -> File.Exists(@"C:\Test\FsInst.dll") |> should be False)
+            (fun () -> File.Exists(targetFile) |> should be True)
+            (fun () -> File.Exists(targetFile) |> should be False)
             
     [<Fact>]
     let ``can have multiple files in one folder`` () =
@@ -56,15 +65,18 @@ module FileSystem =
             |> createFolder Test
             |> installFiles ["FsInst.dll"; "FsInst.Facts.dll"] into Test
 
+        let targetFile1 = sprintf @"%sTest\FsInst.dll" targetDir
+        let targetFile2 = sprintf @"%sTest\FsInst.Facts.dll" targetDir
+
         installAndTest
             installationPackage
             "multipleFiles.msi"
             (fun () ->
-                File.Exists(@"C:\Test\FsInst.dll") |> should be True
-                File.Exists(@"C:\Test\FsInst.Facts.dll") |> should be True)
+                File.Exists(targetFile1) |> should be True
+                File.Exists(targetFile2) |> should be True)
             (fun () ->
-                File.Exists(@"C:\Test\FsInst.dll") |> should be False
-                File.Exists(@"C:\Test\FsInst.Facts.dll") |> should be False)
+                File.Exists(targetFile1) |> should be False
+                File.Exists(targetFile2) |> should be False)
 
     [<Fact>]
     let ``can have hierarchical folders`` () =
@@ -81,15 +93,18 @@ module FileSystem =
             |> installFile "FsInst.dll" into folder
             |> installFile "FsInst.Facts.dll" into subFolder
 
+        let targetFile1 = sprintf @"%sTest\FsInst.dll" targetDir
+        let targetFile2 = sprintf @"%sTest\SubFolder\FsInst.Facts.dll" targetDir
+
         installAndTest
             installationPackage
             "hierarchicalfolders.msi"
             (fun () ->
-                File.Exists(@"C:\Test\FsInst.dll") |> should be True
-                File.Exists(@"C:\Test\SubFolder\FsInst.Facts.dll") |> should be True)
+                File.Exists(targetFile1) |> should be True
+                File.Exists(targetFile2) |> should be True)
             (fun () ->
-                File.Exists(@"C:\Test\FsInst.dll") |> should be False
-                File.Exists(@"C:\Test\SubFolder\FsInst.Facts.dll") |> should be False)
+                File.Exists(targetFile1) |> should be False
+                File.Exists(targetFile2) |> should be False)
 
     [<Fact>]
     let ``defines a variable for the program files folder`` () =

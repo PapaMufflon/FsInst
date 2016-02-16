@@ -27,6 +27,7 @@ module FileSystem =
     let targetDir =
         let biggestDrive =
             DriveInfo.GetDrives()
+            |> Array.filter (fun x -> x.IsReady && x.DriveType = DriveType.Fixed)
             |> Array.maxBy (fun x -> x.AvailableFreeSpace)
 
         biggestDrive.Name
@@ -45,7 +46,7 @@ module FileSystem =
             |> installFile "FsInst.dll" into Test
 
         let targetFile = sprintf @"%sTest\FsInst.dll" targetDir
-
+        
         installAndTest
             installationPackage
             "createFolder.msi"
@@ -118,7 +119,7 @@ module FileSystem =
         
         let programFilesFolder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles)
         let installedFile = Path.Combine(programFilesFolder, "FsInst.dll")
-
+        
         installAndTest
             installationPackage
             "programFilesFolder.msi"

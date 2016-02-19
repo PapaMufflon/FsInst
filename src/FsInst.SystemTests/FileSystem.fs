@@ -80,6 +80,29 @@ module FileSystem =
                 File.Exists(targetFile2) |> should be False)
 
     [<Fact>]
+    let ``can have multiple files in one folder implicitly`` () =
+        let installationPackage =
+            InstallationPackage
+            |> copyright "Acme Inc."
+            |> installing
+                { Product with
+                    Name = "Foobar 1.0" }
+            |> installFiles ["FsInst.dll"; "FsInst.Facts.dll"] into (InstallationDrive/"Test")
+
+        let targetFile1 = sprintf @"%sTest\FsInst.dll" targetDir
+        let targetFile2 = sprintf @"%sTest\FsInst.Facts.dll" targetDir
+
+        installAndTest
+            installationPackage
+            "multipleFiles.msi"
+            (fun () ->
+                File.Exists(targetFile1) |> should be True
+                File.Exists(targetFile2) |> should be True)
+            (fun () ->
+                File.Exists(targetFile1) |> should be False
+                File.Exists(targetFile2) |> should be False)
+
+    [<Fact>]
     let ``can have hierarchical folders`` () =
         let folder = InstallationDrive/"Test"
         let subFolder = folder/"SubFolder"

@@ -26,6 +26,36 @@ module FileSystem =
         | _ -> failwith "Test is not a folder."
 
     [<Fact>]
+    let ``creates implicitly a folder if you deploy a file in it`` () =
+        let installationPackage =
+            InstallationPackage
+            |> copyright "Acme Inc."
+            |> installFile "FsInst.dll" into "Test"
+
+        let simulation = simulate installationPackage
+
+        let simulatedFolder = simulation.FileSystem.InstallationDrive/"Test"
+
+        match simulatedFolder with
+        | InstalledFolder f -> f.Name |> should equal "Test"
+        | _ -> failwith "Test is not a folder."
+
+    [<Fact>]
+    let ``creates implicitly a subfolder if you deploy a file in it`` () =
+        let installationPackage =
+            InstallationPackage
+            |> copyright "Acme Inc."
+            |> installFile "FsInst.dll" into (ProgramFiles/"Test")
+
+        let simulation = simulate installationPackage
+
+        let simulatedFolder = simulation.FileSystem.InstallationDrive/ProgramFiles/"Test"
+
+        match simulatedFolder with
+        | InstalledFolder f -> f.Name |> should equal "Test"
+        | _ -> failwith "Test is not a folder."
+
+    [<Fact>]
     let ``can have multiple files in one folder`` () =
         let Test = InstallationDrive/"Test"
 

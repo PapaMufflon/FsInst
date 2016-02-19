@@ -50,10 +50,18 @@ module Core =
         Parent : Folder option
         Components : Component list } with
 
+        override x.ToString() = x.Name
+
         static member (/) (x:Folder, y:obj) =
             match y with
-            | :? Folder as f -> { f with Id = newGuid "d"; Parent = (if x.Name = "TARGETDIR" then None else Some x) }
-            | :? String as s -> { Id = newGuid "d"; Name = s; Parent = (if x.Name = "TARGETDIR" then None else Some x); Components = [] }
+            | :? Folder as f ->
+                { f with
+                    Id = newGuid "d"
+                    Parent = (if x.Name = "TARGETDIR" then None else Some x) }
+            | :? String as s ->
+                { Id = newGuid "d"
+                  Name = s
+                  Parent = (if x.Name = "TARGETDIR" then None else Some x); Components = [] }
             | _ -> failwith "not supported"
 
     let InstallationDrive = { Id = newGuid "d"; Name = "TARGETDIR"; Parent = None; Components = [] }
@@ -77,11 +85,17 @@ module Core =
         { installationPackage with
             Product = product }
 
+    let folderWithName name =
+        { Id = newGuid "d"
+          Name = name
+          Parent = None
+          Components = [] }
+
     let rec createFolder (folder:Object) installationPackage =
         match folder with
         | :? Folder as f ->
             let folders =
-                if installationPackage.Folders |> List.contains f ||
+                if installationPackage.Folders |> List.exists (fun x -> x.Id = f.Id) ||
                    f = InstallationDrive then
                     installationPackage.Folders
                 else       
@@ -90,20 +104,28 @@ module Core =
             match f.Parent with
             | Some parentFolder -> createFolder parentFolder { installationPackage with Folders = folders }
             | None -> { installationPackage with Folders = folders }
-        | _ -> { installationPackage with Folders = { Id = newGuid "d"; Name = folder.ToString(); Parent = None; Components = [] } :: installationPackage.Folders }
+        | _ ->
+            { installationPackage with
+                Folders = (folderWithName (folder.ToString())) :: installationPackage.Folders }
 
     let into = ()
 
-    let installFile fileName into folder (installationPackage:InstallationPackage) =
-        let otherFolders = List.except [ folder ] installationPackage.Folders
-        let folderWithFile = { folder with Components = Component([File(fileName)]) :: folder.Components }
+    let installFiles (fileNames:string list) into (folder:obj) (installationPackage:InstallationPackage) =
+        let destinationFolder =
+            match folder with
+            | :? Folder as f -> f
+            | _ -> folderWithName (folder.ToString())
 
-        { installationPackage with Folders = folderWithFile :: otherFolders }
+        let installationPackageWithFolder = createFolder destinationFolder installationPackage
+        let otherFolders = List.except [ destinationFolder ] installationPackageWithFolder.Folders
 
-    let installFiles (fileNames:string list) into folder (installationPackage:InstallationPackage) =
-        let otherFolders = List.except [ folder ] installationPackage.Folders
         let files = List.map (fun fileName -> File(fileName)) fileNames
         let components = List.map (fun file -> Component([file])) files
-        let folderWithFile = { folder with Components = folder.Components |> List.append components }
+        let folderWithFile =
+            { destinationFolder with
+                Components = destinationFolder.Components |> List.append components }
 
         { installationPackage with Folders = folderWithFile :: otherFolders }
+
+    let installFile fileName into (folder:obj) (installationPackage:InstallationPackage) =
+        installFiles [fileName] into folder installationPackage

@@ -25,12 +25,14 @@ let msi = installationPackage |> msi "setup.msi"
 // test in-memory content of installer data
 let simulation = simulate installationPackage
 
-simulation.FileSystem.InstallationDrive/ProgramFiles/"Test"/"FsInst.dll" |> should equal (InstalledFile("FsInst.dll"))
+simulation.FileSystem.InstallationDrive/ProgramFiles/"Test"/"FsInst.dll"
+|> should equal (InstalledFile("FsInst.dll"))
 
 // load and test msi file
 let simulationOfMsi = FsInst.Simulation.Msi.simulate msi // msi = (FileInfo("setup.msi"))
 
-simulationOfMsi.FileSystem.InstallationDrive/ProgramFiles/"Test"/"FsInst.dll" |> should equal (InstalledFile("FsInst.dll"))
+simulationOfMsi.FileSystem.InstallationDrive/ProgramFiles/"Test"/"FsInst.dll"
+|> should equal (InstalledFile("FsInst.dll"))
 ```
 
 ## First Goal

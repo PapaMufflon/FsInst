@@ -42,6 +42,7 @@ module FileSystem =
             |> installing
                 { Product with
                     Name = "Foobar 1.0" }
+                using Installer
             |> createFolder Test
             |> installFile "FsInst.dll" into Test
 
@@ -63,6 +64,7 @@ module FileSystem =
             |> installing
                 { Product with
                     Name = "Foobar 1.0" }
+                using Installer
             |> createFolder Test
             |> installFiles ["FsInst.dll"; "FsInst.Facts.dll"] into Test
 
@@ -87,6 +89,7 @@ module FileSystem =
             |> installing
                 { Product with
                     Name = "Foobar 1.0" }
+                using Installer
             |> installFiles ["FsInst.dll"; "FsInst.Facts.dll"] into (InstallationDrive/"Test")
 
         let targetFile1 = sprintf @"%sTest\FsInst.dll" targetDir
@@ -113,6 +116,7 @@ module FileSystem =
             |> installing
                 { Product with
                     Name = "Foobar 1.0" }
+                using Installer
             |> createFolder subFolder
             |> installFile "FsInst.dll" into folder
             |> installFile "FsInst.Facts.dll" into subFolder
@@ -138,6 +142,7 @@ module FileSystem =
             |> installing
                 { Product with
                     Name = "Foobar 1.0" }
+                using Installer
             |> installFile "FsInst.dll" into ProgramFiles
         
         let programFilesFolder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles)

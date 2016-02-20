@@ -39,6 +39,7 @@ module ``Programs and Features`` =
                     Name = "Foobar 1.0";
                     Language = ``en-US``
                     Version = V 1 2 3 }
+                using Installer
 
         let simulation =
             installationPackage
@@ -58,3 +59,36 @@ module ``Programs and Features`` =
         simulationOfMsi.ControlPanel.ProgramsAndFeatures.Version |> should equal (V 1 2 3)
 
         File.Delete("productProperties.msi")
+
+    [<Fact>]
+    let ``can define installer properties`` () =
+        let installationPackage =
+            InstallationPackage
+            |> copyright "Acme Ltd."
+            |> installing Product using
+                { Installer with
+                    Description = "Acme's Foobar 1.0 Installer";
+                    Comments = "Foobar is a registered trademark of Acme Ltd."
+                    Keywords = "Installer"
+                    MinimumVersion = V 2 0 0 }
+
+        let simulation =
+            installationPackage
+            |> simulate
+
+        simulation.Installer.Description |> should equal "Acme's Foobar 1.0 Installer"
+        simulation.Installer.Comments |> should equal "Foobar is a registered trademark of Acme Ltd."
+        simulation.Installer.Keywords |> should equal "Installer"
+        simulation.Installer.MinimumVersion |> should equal (V 2 0 0)
+
+        let simulationOfMsi =
+            installationPackage
+            |> msi "installerProperties.msi"
+            |> FsInst.Simulation.Msi.simulate
+
+        simulationOfMsi.Installer.Description |> should equal "Acme's Foobar 1.0 Installer"
+        simulationOfMsi.Installer.Comments |> should equal "Foobar is a registered trademark of Acme Ltd."
+        simulationOfMsi.Installer.Keywords |> should equal "Installer"
+        simulationOfMsi.Installer.MinimumVersion |> should equal (V 2 0 0)
+
+        File.Delete("installerProperties.msi")

@@ -1,9 +1,10 @@
 open questions:
+- project type-to-file ratio OK?
 - how to force execute sequence? inheritance?
+- GUID handling Windows Installer wise OK?
 - classes --> records with private fields, ctors and active patterns!?
 
 backlog:
-- installer properties
 - introduce Manufacturer and Product property
 - shortcuts
 - csproj type provider

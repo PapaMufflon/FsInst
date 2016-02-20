@@ -27,6 +27,18 @@ module Core =
         Version = V 1 0 0
     }
 
+    type InstallerSpecification =
+        { Description : string
+          Comments : string
+          Keywords : string
+          MinimumVersion : Version }
+
+    let Installer =
+        { Description = String.Empty
+          Comments = String.Empty
+          Keywords = String.Empty
+          MinimumVersion = V 2 0 0 }
+
     type File(fileName:string) =
         let id = "f" +  Guid.NewGuid().ToString("N").ToUpper()
 
@@ -71,19 +83,24 @@ module Core =
     type InstallationPackage = {
         Manufacturer : string
         Product : ProductSpecification
+        Installer : InstallerSpecification
         Folders: Folder list }
 
     let InstallationPackage = {
         Manufacturer = String.Empty
         Product = Product
+        Installer = Installer
         Folders = [] }
 
     let copyright manufacturer installationPackage =
         { installationPackage with Manufacturer = manufacturer }
 
-    let installing product installationPackage =
+    let using = ()
+
+    let installing product using installer installationPackage =
         { installationPackage with
-            Product = product }
+            Product = product
+            Installer = installer }
 
     let folderWithName name =
         { Id = newGuid "d"

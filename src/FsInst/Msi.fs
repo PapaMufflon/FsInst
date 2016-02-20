@@ -83,15 +83,16 @@ module Msi =
             let productCode = Guid.NewGuid().ToString("B").ToUpper()
             let upgradeCode = Guid.NewGuid().ToString("B").ToUpper()
             let productName = installationPackage.Product.Name
+            let versionToPageCount version = version.Major * 100 + version.Minor
 
             database.SummaryInfo.Title <- "Installation Database"
             database.SummaryInfo.Author <- installationPackage.Manufacturer
-            database.SummaryInfo.Subject <- productName
-            database.SummaryInfo.Comments <- sprintf "This installer database contains the logic and data required to install %s" productName
-            database.SummaryInfo.Keywords <- "Installer"
+            database.SummaryInfo.Subject <- installationPackage.Installer.Description
+            database.SummaryInfo.Comments <- installationPackage.Installer.Comments
+            database.SummaryInfo.Keywords <- installationPackage.Installer.Keywords
             database.SummaryInfo.RevisionNumber <-  productCode
             database.SummaryInfo.Template <- "x64;1033"
-            database.SummaryInfo.PageCount <- 200
+            database.SummaryInfo.PageCount <- versionToPageCount installationPackage.Installer.MinimumVersion
             database.SummaryInfo.WordCount <- 2
 
             database.Execute("INSERT INTO Directory (Directory, DefaultDir) VALUES ('TARGETDIR', 'SourceDir')")
@@ -139,7 +140,7 @@ module Msi =
                             dic.Add(f.Id, f.FileName)
 
                             let hashes = Array.zeroCreate 4
-                            Installer.GetFileHash(f.FileName, hashes)
+                            Microsoft.Deployment.WindowsInstaller.Installer.GetFileHash(f.FileName, hashes)
                             database.Execute(sprintf "INSERT INTO MsiFileHash (File_, Options, HashPart1, HashPart2, HashPart3, HashPart4) VALUES ('%s', '0', '%d', '%d', '%d', '%d')" f.Id hashes.[0] hashes.[1] hashes.[2] hashes.[3]))
 
                 use view = database.OpenView("SELECT `Name`,`Data` FROM _Streams")

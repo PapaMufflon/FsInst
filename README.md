@@ -11,9 +11,15 @@ let installationPackage =
     |> copyright "Acme Inc."
     |> installing
         { Product with
-          Name = "Foobar 1.0";
-          Language = ``en-US``
-          Version = V 1 0 0 }
+            Name = "Foobar 1.0";
+            Language = ``en-US``
+            Version = V 1 0 0 }
+        using
+        { Installer with
+            Description = "Acme's Foobar 1.0 Installer";
+            Comments = "Foobar is a registered trademark of Acme Ltd."
+            Keywords = "Installer"
+            MinimumVersion = V 2 0 0 }
     |> installFile "FsInst.dll" into (ProgramFiles/"Test")
 
 // create msi file
@@ -51,9 +57,7 @@ InstallationPackage
         Description = "Acme's Foobar 1.0 Installer";
         Comments = "Foobar is a registered trademark of Acme Ltd."
         Keywords = "Installer"
-        Language = ``en-US``
-        MinimumVersion = V 2 0 0
-        Compressed = Yes }
+        MinimumVersion = V 2 0 0 }
 |> installFiles [
     Solution.FoobarAppl10.Executable
     Solution.FoobarAppl10.References

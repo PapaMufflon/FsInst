@@ -4,12 +4,13 @@
 module Types =
     open System
     open System.Globalization
+    open FsInst.Core
 
-    type ProgramsAndFeatures = {
-        Publisher : string
-        Name : string
-        Language : CultureInfo
-        Version : FsInst.Core.Version }
+    type ProgramsAndFeatures =
+        { Publisher : string
+          Name : string
+          Language : CultureInfo
+          Version : FsInst.Core.Version }
     
     type ControlPanel = 
         { ProgramsAndFeatures : ProgramsAndFeatures }
@@ -73,8 +74,9 @@ module Types =
           Children = rootFolders folders
           Files = [] }
 
-    type Simulation = 
-        { ControlPanel : ControlPanel
+    type Simulation =
+        { Installer : InstallerSpecification
+          ControlPanel : ControlPanel
           FileSystem : FileSystem }
 
 module InstallationPackage =
@@ -101,14 +103,14 @@ module InstallationPackage =
                    Children = []
                    Files = getFiles f }))
 
-        let programsAndFeatures = {
-            Publisher = installationPackage.Manufacturer
-            Name = installationPackage.Product.Name
-            Language = installationPackage.Product.Language
-            Version = installationPackage.Product.Version
-        }
+        let programsAndFeatures =
+            { Publisher = installationPackage.Manufacturer
+              Name = installationPackage.Product.Name
+              Language = installationPackage.Product.Language
+              Version = installationPackage.Product.Version }
         
-        { ControlPanel = { ProgramsAndFeatures = programsAndFeatures }
+        { Installer = installationPackage.Installer
+          ControlPanel = { ProgramsAndFeatures = programsAndFeatures }
           FileSystem = { InstallationDrive = toFileSystem convertedFolders } }
 
 module Msi =
@@ -157,15 +159,36 @@ module Msi =
 
         let version = convertToVersion (database.ExecutePropertyQuery("ProductVersion"))
 
-        let (|Int|_|) str =
-            match Int32.TryParse(str) with
-            | (true, int) -> Some(int)
-            | _ -> None
+//        let (|Int|_|) str =
+//            match Int32.TryParse(str) with
+//            | (true, int) -> Some(int)
+//            | _ -> None
 
         let language = ``en-US`` // default language
 //            match (database.ExecutePropertyQuery("ProductLanguage")) with
 //            | Int i -> if i = 1033 then ``en-US`` else failwith (sprintf "The language with ID %d is not supported." i)
 //            | s -> failwith (sprintf "The string %s for a language identifier is not supported." s)
 
-        { ControlPanel = { ProgramsAndFeatures = { Publisher = manufacturer; Name = name; Language = language; Version = version } }
+        let description = database.SummaryInfo.Subject
+        let comments = database.SummaryInfo.Comments
+        let keywords = database.SummaryInfo.Keywords
+
+        let pageCountToVersion pageCount =
+            let major = pageCount / 100
+            let minor = pageCount - major*100
+            V major minor 0
+
+        let installerVersion = pageCountToVersion database.SummaryInfo.PageCount
+
+        { Installer =
+            { Description = description
+              Comments = comments
+              Keywords = keywords
+              MinimumVersion = installerVersion }
+          ControlPanel =
+              { ProgramsAndFeatures =
+                  { Publisher = manufacturer;
+                    Name = name;
+                    Language = language;
+                    Version = version } }
           FileSystem = readFilesAndFolders database }

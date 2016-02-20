@@ -4,28 +4,26 @@ module Core =
     open System
     open System.Globalization
 
-    type Version = {
-        Major : int
-        Minor : int
-        Build : int } with
+    type Version =
+        { Major : int
+          Minor : int
+          Build : int } with
         override x.ToString() = sprintf "%d.%d.%d" x.Major x.Minor x.Build
 
-    type ProductSpecification = {
-        Name : string
-        Language : CultureInfo
-        Version : Version
-    }
+    type ProductSpecification =
+        { Name : string
+          Language : CultureInfo
+          Version : Version }
 
     let ``en-US`` = CultureInfo("en-US")
 
     let V major minor build =
         { Major = major; Minor = minor; Build = build}
 
-    let Product = {
-        Name = String.Empty
-        Language = ``en-US``
-        Version = V 1 0 0
-    }
+    let Product =
+        { Name = String.Empty
+          Language = ``en-US``
+          Version = V 1 0 0 }
 
     type InstallerSpecification =
         { Description : string
@@ -39,28 +37,32 @@ module Core =
           Keywords = String.Empty
           MinimumVersion = V 2 0 0 }
 
-    type File(fileName:string) =
-        let id = "f" +  Guid.NewGuid().ToString("N").ToUpper()
-
-        member x.FileName = fileName
-        member x.Id = id
-
-    type Component(files:File list) =
-        let name = "c" + Guid.NewGuid().ToString("N").ToUpper()
-        let id = sprintf "{%s}" (Guid.NewGuid().ToString().ToUpper())
-
-        member x.Files = files
-        member x.Name = name
-        member x.Id = id
-    
     let newGuid prefix =
         prefix + Guid.NewGuid().ToString("N").ToUpper()
 
-    type Folder = {
-        Id : string
-        Name : string
-        Parent : Folder option
-        Components : Component list } with
+    type File =
+        { Id : string
+          FileName : string } with
+
+        static member create fileName =
+            { Id = newGuid "f"
+              FileName = fileName }
+
+    type Component =
+        { Id : string
+          Name : string
+          Files : File list } with
+
+        static member create files =
+            { Id = sprintf "{%s}" (Guid.NewGuid().ToString().ToUpper())
+              Name = newGuid "c"
+              Files = files }
+
+    type Folder =
+        { Id : string
+          Name : string
+          Parent : Folder option
+          Components : Component list } with
 
         override x.ToString() = x.Name
 
@@ -76,21 +78,29 @@ module Core =
                   Parent = (if x.Name = "TARGETDIR" then None else Some x); Components = [] }
             | _ -> failwith "not supported"
 
-    let InstallationDrive = { Id = newGuid "d"; Name = "TARGETDIR"; Parent = None; Components = [] }
+    let InstallationDrive =
+        { Id = newGuid "d"
+          Name = "TARGETDIR"
+          Parent = None
+          Components = [] }
 
-    let ProgramFiles = { Id = "ProgramFiles64Folder"; Name = "."; Parent = None; Components = [] }
+    let ProgramFiles =
+        { Id = "ProgramFiles64Folder"
+          Name = "."
+          Parent = None
+          Components = [] }
 
-    type InstallationPackage = {
-        Manufacturer : string
-        Product : ProductSpecification
-        Installer : InstallerSpecification
-        Folders: Folder list }
+    type InstallationPackage =
+        { Manufacturer : string
+          Product : ProductSpecification
+          Installer : InstallerSpecification
+          Folders: Folder list }
 
-    let InstallationPackage = {
-        Manufacturer = String.Empty
-        Product = Product
-        Installer = Installer
-        Folders = [] }
+    let InstallationPackage =
+        { Manufacturer = String.Empty
+          Product = Product
+          Installer = Installer
+          Folders = [] }
 
     let copyright manufacturer installationPackage =
         { installationPackage with Manufacturer = manufacturer }
@@ -136,8 +146,8 @@ module Core =
         let installationPackageWithFolder = createFolder destinationFolder installationPackage
         let otherFolders = List.except [ destinationFolder ] installationPackageWithFolder.Folders
 
-        let files = List.map (fun fileName -> File(fileName)) fileNames
-        let components = List.map (fun file -> Component([file])) files
+        let files = List.map (fun fileName -> fileName |> File.create) fileNames
+        let components = List.map (fun file -> [file] |> Component.create) files
         let folderWithFile =
             { destinationFolder with
                 Components = destinationFolder.Components |> List.append components }

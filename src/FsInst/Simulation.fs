@@ -15,12 +15,12 @@ module Types =
     type ControlPanel = 
         { ProgramsAndFeatures : ProgramsAndFeatures }
     
-    type Folder = {
-        Id : string
-        Name : string
-        Parent : Folder option
-        Children : Folder list
-        Files : string list } with
+    type Folder =
+        { Id : string
+          Name : string
+          Parent : Folder option
+          Children : Folder list
+          Files : string list } with
 
         static member (/)(folder:Folder, subfolder:obj) =
             let subFolderName =
@@ -151,9 +151,10 @@ module Msi =
 
         let convertToVersion versionString =
             let m = Regex.Match(versionString, "([0-9]+).([0-9]+).([0-9]+)")
-            
+            let parse (index:int) (regexMatch:Match) = Int32.Parse(regexMatch.Groups.[index].Value)
+
             if m.Success then
-                V (Int32.Parse(m.Groups.[1].Value)) (Int32.Parse(m.Groups.[2].Value)) (Int32.Parse(m.Groups.[3].Value))
+                V (m |> parse 1) (m |> parse 2) (m |> parse 3)
             else
                 V 0 0 0
 

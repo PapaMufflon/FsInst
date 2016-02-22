@@ -29,7 +29,6 @@ module Types =
                 | :? FsInst.Core.Folder as sub -> sub.Name
                 | :? String as s -> s
                 | _ -> failwith "not supported"
-
             if folder.Children |> List.exists (fun f -> f.Name = subFolderName) then 
                 InstalledFolder(List.exactlyOne (folder.Children |> List.where (fun (f : Folder) -> f.Name = subFolderName)))
             else
@@ -98,7 +97,7 @@ module InstallationPackage =
             |> List.map (fun f -> 
                 (parentToId f.Parent,
                  { Id = f.Id
-                   Name = f.Name
+                   Name = if f.Id = "ManufacturerFolder" then installationPackage.Manufacturer else f.Name
                    Parent = None
                    Children = []
                    Files = getFiles f }))

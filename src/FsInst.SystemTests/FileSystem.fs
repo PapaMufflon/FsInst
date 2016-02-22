@@ -153,3 +153,23 @@ module FileSystem =
             "programFilesFolder.msi"
             (fun () -> File.Exists(installedFile) |> should be True)
             (fun () -> File.Exists(installedFile) |> should be False)
+
+    [<Fact>]
+    let ``the manufacturer variable can be used to create a folder`` () =
+        let installationPackage =
+            InstallationPackage
+            |> copyright "Acme Inc"
+            |> installing
+                { Product with
+                    Name = "Foobar 1.0" }
+                using Installer
+            |> installFile "FsInst.dll" into (ProgramFiles/Manufacturer)
+
+        let programFilesFolder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles)
+        let installedFile = Path.Combine(programFilesFolder, "Acme Inc", "FsInst.dll")
+
+        installAndTest
+            installationPackage
+            "manufacturer.msi"
+            (fun () -> File.Exists(installedFile) |> should be True)
+            (fun () -> File.Exists(installedFile) |> should be False)

@@ -116,17 +116,17 @@ module Msi =
 
             database
 
-        let writeFilesAndFolders (folders:Folder list) (database:Database) =
-            if not (List.isEmpty folders) then
+        let writeFilesAndFolders installationPackage (database:Database) =
+            if not (List.isEmpty installationPackage.Folders) then
                 let formatParent = function
                 | Some (x:Folder) -> x.Id
                 | None -> "TARGETDIR"
-            
+
                 let dic = new Dictionary<string, string>()
                 let fileSequenceCounter = ref 1
 
-                for folder in folders do
-                    database.Execute(sprintf "INSERT INTO Directory (Directory, Directory_Parent, DefaultDir) VALUES ('%s', '%s', '%s')" folder.Id (formatParent folder.Parent) folder.Name)
+                for folder in installationPackage.Folders do
+                    database.Execute(sprintf "INSERT INTO Directory (Directory, Directory_Parent, DefaultDir) VALUES ('%s', '%s', '%s')" folder.Id (formatParent folder.Parent) (if folder.Id = "ManufacturerFolder" then installationPackage.Manufacturer else folder.Name))
 
                     for c in folder.Components do
                         database.Execute(sprintf "INSERT INTO Component (Component, ComponentId, Directory_, Attributes, KeyPath) VALUES ('%s', '%s', '%s',  %d, '%s')" c.Name c.Id folder.Id 0 (List.head c.Files).Id)
@@ -171,7 +171,7 @@ module Msi =
             |> addBasicSequences
             |> writeSummaryInfo installationPackage
             |> writeManufacturer installationPackage
-            |> writeFilesAndFolders installationPackage.Folders
+            |> writeFilesAndFolders installationPackage
         
         database.Commit()
 

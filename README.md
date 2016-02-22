@@ -8,7 +8,7 @@ The goal of this project should be to create a terse, easy to learn and testable
 // configure installer content
 let installationPackage =
     InstallationPackage
-    |> copyright "Acme Inc."
+    |> copyright "Acme Inc"
     |> installing
         { Product with
             Name = "Foobar 1.0";
@@ -20,7 +20,7 @@ let installationPackage =
             Comments = "Foobar is a registered trademark of Acme Ltd."
             Keywords = "Installer"
             MinimumVersion = V 2 0 0 }
-    |> installFile "FsInst.dll" into (ProgramFiles/"Test")
+    |> installFile "FsInst.dll" into (ProgramFiles/Manufacturer)
 
 // create msi file
 let msi = installationPackage |> msi "setup.msi"
@@ -31,13 +31,13 @@ let msi = installationPackage |> msi "setup.msi"
 // test in-memory content of installer data
 let simulation = simulate installationPackage
 
-simulation.FileSystem.InstallationDrive/ProgramFiles/"Test"/"FsInst.dll"
+simulation.FileSystem.InstallationDrive/ProgramFiles/"Acme Inc"/"FsInst.dll"
 |> should equal (InstalledFile("FsInst.dll"))
 
 // load and test msi file
 let simulationOfMsi = FsInst.Simulation.Msi.simulate msi // msi = (FileInfo("setup.msi"))
 
-simulationOfMsi.FileSystem.InstallationDrive/ProgramFiles/"Test"/"FsInst.dll"
+simulationOfMsi.FileSystem.InstallationDrive/ProgramFiles/"Acme Inc"/"FsInst.dll"
 |> should equal (InstalledFile("FsInst.dll"))
 ```
 
@@ -46,7 +46,7 @@ Being able to reproduce the [getting started example of the WiX Toolset tutorial
 ```fsharp
 
 InstallationPackage
-|> copyright "Acme Ltd."
+|> copyright "Acme Ltd"
 |> installing
     { Product with
         Name = "Foobar 1.0";

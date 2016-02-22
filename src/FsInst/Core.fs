@@ -70,7 +70,6 @@ module Core =
             match y with
             | :? Folder as f ->
                 { f with
-                    Id = newGuid "d"
                     Parent = (if x.Name = "TARGETDIR" then None else Some x) }
             | :? String as s ->
                 { Id = newGuid "d"
@@ -87,6 +86,12 @@ module Core =
     let ProgramFiles =
         { Id = "ProgramFiles64Folder"
           Name = "."
+          Parent = None
+          Components = [] }
+
+    let Manufacturer =
+        { Id = "ManufacturerFolder"
+          Name = "?Manufacturer?"
           Parent = None
           Components = [] }
 

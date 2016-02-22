@@ -75,3 +75,20 @@ module FileSystem =
         simulationOfMsi.FileSystem.InstallationDrive/ProgramFiles/"FsInst.dll" |> should equal (InstalledFile("FsInst.dll"))
 
         File.Delete("programFilesFolderSimulation.msi")
+
+    [<Fact>]
+    let ``the manufacturer variable can be used to create a folder`` () =
+        let simulationOfMsi =
+            InstallationPackage
+            |> copyright "Acme Inc"
+            |> installFile "FsInst.dll" into (ProgramFiles/Manufacturer)
+            |> msi "manufacturerSimulation.msi"
+            |> FsInst.Simulation.Msi.simulate
+
+        let simulatedFolder = simulationOfMsi.FileSystem.InstallationDrive/ProgramFiles/"Acme Inc"
+
+        match simulatedFolder with
+        | InstalledFolder f -> f.Name |> should equal "Acme Inc"
+        | _ -> failwith "Acme Inc is no folder"
+
+        File.Delete("manufacturerSimulation.msi")

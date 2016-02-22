@@ -4,7 +4,7 @@ open questions:
 - GUID handling Windows Installer wise OK?
 
 backlog:
-- introduce Manufacturer and Product property
+- introduce Product property
 - shortcuts
 - csproj type provider
 - msi type provider

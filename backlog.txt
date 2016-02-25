@@ -1,11 +1,41 @@
 open questions:
 - project type-to-file ratio OK?
 - how to force execute sequence? inheritance?
+  - create compile warnings when wrong order?
 - GUID handling Windows Installer wise OK?
 
 backlog:
 - shortcuts
 - csproj type provider
 - Properties and then make Manufacturer&Product a property
+
+  get/set:
+  let foo = Property.create "test"
+  let installationPackage =
+      InstallationPackage
+      |> set foo to "blupp"
+      |> installFile "file.ext" into (ProgramFiles/foo)
+
+  with custom action:
+  let bar = searchRegistry "HKLM/foo/bar/baz"    // a property should have a function to be called by set method or
+                                                 // m@tch method to write itself into the InstallationPackage
+                                                 // (so the searchRegistry custom action gets into the msi package).
+  let installationPackage =
+      InstallationPackage
+      |> m@tch bar with [
+          is "lorem", installFile "file.ext" into (ProgramFiles/Product)
+          otherwise, () ]
+
+  or explicitly?
+  let bar = Property.create  // <-- can the property in the msi be named 'bar'?
+
+  let installationPackage =
+      InstallationPackage
+      |> searchRegistry "HKLM/foo/bar/baz" bar  // <-- searchRegistry is custom action and
+                                                // issues warning when in wrong order!?
+      |> m@tch bar with [
+          is "lorem", installFile "file.ext" into (ProgramFiles/Product)
+          otherwise, () ]  
+
 - msi type provider?
-- custom actions
+- (debuggable) custom actions (in simulation)

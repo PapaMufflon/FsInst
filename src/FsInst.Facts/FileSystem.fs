@@ -97,6 +97,7 @@ module FileSystem =
         let simulation = simulate installationPackage
 
         simulation.FileSystem.InstallationDrive/ProgramFiles/"FsInst.dll" |> should equal (InstalledFile("FsInst.dll"))
+
     [<Fact>]
     let ``the manufacturer variable can be used to create a folder`` () =
         let installationPackage =
@@ -111,3 +112,22 @@ module FileSystem =
         match simulatedFolder with
         | InstalledFolder f -> f.Name |> should equal "Acme Inc"
         | _ -> failwith "'Acme Inc' is not a folder"
+
+    [<Fact>]
+    let ``the product variable can be used to create a folder`` () =
+        let installationPackage =
+            InstallationPackage
+            |> copyright "Acme Inc"
+            |> installing
+                { Product with
+                    Name = "Foobar 1.0" }
+                using Installer
+            |> installFile "FsInst.dll" into (ProgramFiles/Manufacturer/Product)
+
+        let simulation = simulate installationPackage
+
+        let simulatedFolder = simulation.FileSystem.InstallationDrive/ProgramFiles/"Acme Inc"/"Foobar 1.0"
+
+        match simulatedFolder with
+        | InstalledFolder f -> f.Name |> should equal "Foobar 1.0"
+        | _ -> failwith "Foobar 1.0 is not a folder"

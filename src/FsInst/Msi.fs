@@ -122,11 +122,17 @@ module Msi =
                 | Some (x:Folder) -> x.Id
                 | None -> "TARGETDIR"
 
+                let formatName f =
+                    match f.Id with
+                    | "ManufacturerFolder" -> installationPackage.Manufacturer
+                    | "ProductFolder" -> installationPackage.Product.Name
+                    | _ -> f.Name
+
                 let dic = new Dictionary<string, string>()
                 let fileSequenceCounter = ref 1
 
                 for folder in installationPackage.Folders do
-                    database.Execute(sprintf "INSERT INTO Directory (Directory, Directory_Parent, DefaultDir) VALUES ('%s', '%s', '%s')" folder.Id (formatParent folder.Parent) (if folder.Id = "ManufacturerFolder" then installationPackage.Manufacturer else folder.Name))
+                    database.Execute(sprintf "INSERT INTO Directory (Directory, Directory_Parent, DefaultDir) VALUES ('%s', '%s', '%s')" folder.Id (formatParent folder.Parent) (formatName folder))
 
                     for c in folder.Components do
                         database.Execute(sprintf "INSERT INTO Component (Component, ComponentId, Directory_, Attributes, KeyPath) VALUES ('%s', '%s', '%s',  %d, '%s')" c.Name c.Id folder.Id 0 (List.head c.Files).Id)

@@ -92,3 +92,22 @@ module FileSystem =
         | _ -> failwith "Acme Inc is no folder"
 
         File.Delete("manufacturerSimulation.msi")
+
+    [<Fact>]
+    let ``the product variable can be used to create a folder`` () =
+        let simulationOfMsi =
+            InstallationPackage
+            |> copyright "Acme Inc"
+            |> installing
+                { Product with
+                    Name = "Foobar 1.0" }
+                using Installer
+            |> installFile "FsInst.dll" into (ProgramFiles/Manufacturer/Product)
+            |> msi "productSimulation.msi"
+            |> FsInst.Simulation.Msi.simulate
+
+        let simulatedFolder = simulationOfMsi.FileSystem.InstallationDrive/ProgramFiles/"Acme Inc"/"Foobar 1.0"
+
+        match simulatedFolder with
+        | InstalledFolder f -> f.Name |> should equal "Foobar 1.0"
+        | _ -> failwith "Foobar 1.0 is no folder"

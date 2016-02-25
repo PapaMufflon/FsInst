@@ -20,7 +20,7 @@ let installationPackage =
             Comments = "Foobar is a registered trademark of Acme Ltd."
             Keywords = "Installer"
             MinimumVersion = V 2 0 0 }
-    |> installFile "FsInst.dll" into (ProgramFiles/Manufacturer)
+    |> installFile "FsInst.dll" into (ProgramFiles/Manufacturer/Product)
 
 // create msi file
 let msi = installationPackage |> msi "setup.msi"
@@ -31,13 +31,13 @@ let msi = installationPackage |> msi "setup.msi"
 // test in-memory content of installer data
 let simulation = simulate installationPackage
 
-simulation.FileSystem.InstallationDrive/ProgramFiles/"Acme Inc"/"FsInst.dll"
+simulation.FileSystem.InstallationDrive/ProgramFiles/"Acme Inc"/"Foobar 1.0"/"FsInst.dll"
 |> should equal (InstalledFile("FsInst.dll"))
 
 // load and test msi file
 let simulationOfMsi = FsInst.Simulation.Msi.simulate msi // msi = (FileInfo("setup.msi"))
 
-simulationOfMsi.FileSystem.InstallationDrive/ProgramFiles/"Acme Inc"/"FsInst.dll"
+simulationOfMsi.FileSystem.InstallationDrive/ProgramFiles/"Acme Inc"/"Foobar 1.0"/"FsInst.dll"
 |> should equal (InstalledFile("FsInst.dll"))
 ```
 

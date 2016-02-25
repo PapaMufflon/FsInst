@@ -67,14 +67,23 @@ module Core =
         override x.ToString() = x.Name
 
         static member (/) (x:Folder, y:obj) =
+            let parentOrTargetDir =
+                if x.Name = "TARGETDIR" then None else Some x
+
             match y with
             | :? Folder as f ->
                 { f with
-                    Parent = (if x.Name = "TARGETDIR" then None else Some x) }
+                    Parent = parentOrTargetDir }
             | :? String as s ->
                 { Id = newGuid "d"
                   Name = s
-                  Parent = (if x.Name = "TARGETDIR" then None else Some x); Components = [] }
+                  Parent = parentOrTargetDir
+                  Components = [] }
+            | :? ProductSpecification as p ->
+                { Id = "ProductFolder"
+                  Name = "?Product?"
+                  Parent = parentOrTargetDir
+                  Components = [] }
             | _ -> failwith "not supported"
 
     let InstallationDrive =

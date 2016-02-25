@@ -29,6 +29,7 @@ module Types =
                 | :? FsInst.Core.Folder as sub -> sub.Name
                 | :? String as s -> s
                 | _ -> failwith "not supported"
+
             if folder.Children |> List.exists (fun f -> f.Name = subFolderName) then 
                 InstalledFolder(List.exactlyOne (folder.Children |> List.where (fun (f : Folder) -> f.Name = subFolderName)))
             else
@@ -46,27 +47,40 @@ module Types =
     type FileSystem = 
         { InstallationDrive : Folder }
     
-    let toFileSystem folders = 
+    let toFileSystem folders =
         let rootFolders folders =
-            let parentsWithChildren = 
-                folders
-                |> List.groupBy (fun (parentId, folder) -> parentId)
-                |> List.map (fun (key, children) -> (key, List.map (fun (sameKey, child) -> child) children))
+            let isNoParent folder folders =
+                not (folders
+                     |> List.exists (fun (parentId, _) -> parentId = folder.Id))
 
-            let roots =
-                folders
-                |> List.filter (fun (parentId, folder) -> String.IsNullOrEmpty(parentId))
+            let isNoParentButChild (parentId, folder) folders =
+                (not (String.IsNullOrEmpty(parentId))) && (isNoParent folder folders)
 
-            roots
-            |> List.map (fun (parentId, folder) -> 
-                let suitableChildren =
-                    parentsWithChildren
-                    |> List.tryFind (fun (pId, children) -> folder.Id = pId)
+            let rec buildUpTree folders =
+                if not (folders |> List.exists (fun f -> isNoParentButChild f folders)) then
+                    folders
+                else
+                    let noParentButChild =
+                        folders
+                        |> List.find (fun f -> isNoParentButChild f folders)
 
-                match suitableChildren with
-                | Some(pId, children) -> { folder with Children = children }
-                | None -> folder)
-            
+                    let parentId, noParentButChildFolder = noParentButChild
+
+                    let parent =
+                        folders
+                        |> List.find (fun (_, folder) -> folder.Id = parentId)
+
+                    let parentsParentId, parentFolder = parent
+
+                    let newParentFolder =
+                        { parentFolder with
+                            Children = noParentButChildFolder :: parentFolder.Children }
+
+                    buildUpTree ((parentsParentId, newParentFolder) :: (List.except [parent; noParentButChild] folders))
+
+            buildUpTree folders
+            |> List.map (fun (parentId, folder) -> folder)
+
         { Id = String.Empty
           Name = "root"
           Parent = None
@@ -93,11 +107,17 @@ module InstallationPackage =
             | Some (p : FsInst.Core.Folder) -> p.Id
             | None -> String.Empty
 
+            let formatName f =
+                match f.Id with
+                | "ManufacturerFolder" -> installationPackage.Manufacturer
+                | "ProductFolder" -> installationPackage.Product.Name
+                | _ -> f.Name
+
             installationPackage.Folders
             |> List.map (fun f -> 
                 (parentToId f.Parent,
                  { Id = f.Id
-                   Name = if f.Id = "ManufacturerFolder" then installationPackage.Manufacturer else f.Name
+                   Name = formatName f
                    Parent = None
                    Children = []
                    Files = getFiles f }))

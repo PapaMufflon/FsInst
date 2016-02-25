@@ -6,5 +6,6 @@ open questions:
 backlog:
 - shortcuts
 - csproj type provider
-- msi type provider
+- Properties and then make Manufacturer&Product a property
+- msi type provider?
 - custom actions

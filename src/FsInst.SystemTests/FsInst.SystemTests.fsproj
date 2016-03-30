@@ -46,7 +46,6 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="FileSystem.fs" />
     <None Include="paket.references" />
-    <Compile Include="FileSystem.Simulation.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FsInst\FsInst.fsproj">

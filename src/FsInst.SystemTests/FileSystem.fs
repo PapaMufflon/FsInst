@@ -5,12 +5,16 @@ module FileSystem =
     open System.IO
     open FsUnit.Xunit
     open FsInst.Core
+    open FsInst.Simulation
     open Xunit
 
-    let installAndTest installationPackage msiFileName installationAssertion uninstallationAssertion =
-        installationPackage
-        |> msi msiFileName
-        |> ignore
+    let installAndTest installationPackage msiFileName simulationAssertions installationAssertion uninstallationAssertion =
+        let msiFile =
+            installationPackage
+            |> msi msiFileName
+
+        let simulationOfMsi = FsInst.Simulation.Msi.simulate msiFile
+        simulationAssertions simulationOfMsi
 
         use installProcess = Process.Start(@"C:\Windows\System32\msiexec.exe", sprintf " /i %s /quiet" msiFileName)
         installProcess.WaitForExit()
@@ -51,6 +55,12 @@ module FileSystem =
         installAndTest
             installationPackage
             "createFolder.msi"
+            (fun simulationOfMsi ->
+                let msiFolder = simulationOfMsi.FileSystem.InstallationDrive/"Test"
+
+                match msiFolder with
+                | InstalledFolder f -> f.Name |> should equal Test.Name
+                | _ -> failwith "Test is not a folder.")
             (fun () -> File.Exists(targetFile) |> should be True)
             (fun () -> File.Exists(targetFile) |> should be False)
             
@@ -74,6 +84,9 @@ module FileSystem =
         installAndTest
             installationPackage
             "multipleFiles.msi"
+            (fun simulationOfMsi ->
+                simulationOfMsi.FileSystem.InstallationDrive/"Test"/"FsInst.dll" |> should equal (InstalledFile("FsInst.dll"))
+                simulationOfMsi.FileSystem.InstallationDrive/"Test"/"FsInst.Facts.dll" |> should equal (InstalledFile("FsInst.Facts.dll")))
             (fun () ->
                 File.Exists(targetFile1) |> should be True
                 File.Exists(targetFile2) |> should be True)
@@ -98,6 +111,9 @@ module FileSystem =
         installAndTest
             installationPackage
             "multipleFiles.msi"
+            (fun simulationOfMsi ->
+                simulationOfMsi.FileSystem.InstallationDrive/"Test"/"FsInst.dll" |> should equal (InstalledFile("FsInst.dll"))
+                simulationOfMsi.FileSystem.InstallationDrive/"Test"/"FsInst.Facts.dll" |> should equal (InstalledFile("FsInst.Facts.dll")))
             (fun () ->
                 File.Exists(targetFile1) |> should be True
                 File.Exists(targetFile2) |> should be True)
@@ -127,6 +143,9 @@ module FileSystem =
         installAndTest
             installationPackage
             "hierarchicalfolders.msi"
+            (fun simulationOfMsi ->
+                simulationOfMsi.FileSystem.InstallationDrive/"Test"/"FsInst.dll" |> should equal (InstalledFile("FsInst.dll"))
+                simulationOfMsi.FileSystem.InstallationDrive/"Test"/"SubFolder"/"FsInst.Facts.dll" |> should equal (InstalledFile("FsInst.Facts.dll")))
             (fun () ->
                 File.Exists(targetFile1) |> should be True
                 File.Exists(targetFile2) |> should be True)
@@ -151,6 +170,7 @@ module FileSystem =
         installAndTest
             installationPackage
             "programFilesFolder.msi"
+            (fun simulationOfMsi -> simulationOfMsi.FileSystem.InstallationDrive/ProgramFiles/"FsInst.dll" |> should equal (InstalledFile("FsInst.dll")))
             (fun () -> File.Exists(installedFile) |> should be True)
             (fun () -> File.Exists(installedFile) |> should be False)
 
@@ -171,6 +191,12 @@ module FileSystem =
         installAndTest
             installationPackage
             "manufacturer.msi"
+            (fun simulationOfMsi ->
+                let simulatedFolder = simulationOfMsi.FileSystem.InstallationDrive/ProgramFiles/"Acme Inc"
+
+                match simulatedFolder with
+                | InstalledFolder f -> f.Name |> should equal "Acme Inc"
+                | _ -> failwith "Acme Inc is no folder")
             (fun () -> File.Exists(installedFile) |> should be True)
             (fun () -> File.Exists(installedFile) |> should be False)
 
@@ -191,5 +217,11 @@ module FileSystem =
         installAndTest
             installationPackage
             "product.msi"
+            (fun simulationOfMsi ->
+                let simulatedFolder = simulationOfMsi.FileSystem.InstallationDrive/ProgramFiles/"Acme Inc"/"Foobar 1.0"
+
+                match simulatedFolder with
+                | InstalledFolder f -> f.Name |> should equal "Foobar 1.0"
+                | _ -> failwith "Foobar 1.0 is no folder")
             (fun () -> File.Exists(installedFile) |> should be True)
             (fun () -> File.Exists(installedFile) |> should be False)

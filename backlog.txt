@@ -6,6 +6,7 @@ open questions:
 
 backlog:
 - shortcuts
+- RoP
 - csproj type provider
 - Properties and then make Manufacturer&Product a property
 
